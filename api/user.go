@@ -15,7 +15,7 @@ type createUserRequest struct {
 	Username string `json:"username" binding:"required,alphanum"`
 	Password string `json:"password" binding:"required,min=6"`
 	FullName string `json:"full_name" binding:"required"`
-	Email string `json:"email" binding:"required,email"`
+	Email    string `json:"email" binding:"required,email"`
 }
 
 type userResponse struct {
@@ -28,11 +28,11 @@ type userResponse struct {
 
 func newUserResponse(user db.User) userResponse {
 	return userResponse{
-		Username: user.Username,
-		FullName: user.FullName,
-		Email: user.Email,
+		Username:          user.Username,
+		FullName:          user.FullName,
+		Email:             user.Email,
 		PasswordChangedAt: user.PasswordChangedAt,
-		CreatedAt: user.CreatedAt,
+		CreatedAt:         user.CreatedAt,
 	}
 }
 
@@ -50,10 +50,10 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	args := db.CreateUserParams{
-		Username: req.Username,
+		Username:       req.Username,
 		HashedPassword: hashedPassword,
-		FullName: req.FullName,
-		Email: req.Email,
+		FullName:       req.FullName,
+		Email:          req.Email,
 	}
 
 	user, err := server.store.CreateUser(ctx, args)
@@ -80,8 +80,8 @@ type loginUserRequest struct {
 }
 
 type loginUserResponse struct {
-	AccessToken string `json:"access_token"`
-	User userResponse `json:"user"`
+	AccessToken string       `json:"access_token"`
+	User        userResponse `json:"user"`
 }
 
 func (server *Server) loginUser(ctx *gin.Context) {
@@ -115,8 +115,8 @@ func (server *Server) loginUser(ctx *gin.Context) {
 
 	rsp := loginUserResponse{
 		AccessToken: accessToken,
-		User: newUserResponse(user),
+		User:        newUserResponse(user),
 	}
 
 	ctx.JSON(http.StatusOK, rsp)
-} 
+}

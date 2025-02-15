@@ -2,15 +2,16 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	db "github.com/mrafid01/simplebank/db/sqlc"
+	"github.com/mrafid01/simplebank/token"
 )
 
 type createAccountRequest struct {
-	Owner string `json:"owner" binding:"required"`
 	Currency string `json:"currency" binding:"required,currency"`
 }
 
@@ -21,9 +22,10 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	args := db.CreateAccountParams{
-		Owner: req.Owner,
-		Balance: 0,
+		Owner:    authPayload.Username,
+		Balance:  0,
 		Currency: req.Currency,
 	}
 
@@ -58,8 +60,16 @@ func (server *Server) getAccountById(ctx *gin.Context) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if account.Owner != authPayload.Username {
+		err := errors.New("account doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 
@@ -68,7 +78,7 @@ func (server *Server) getAccountById(ctx *gin.Context) {
 
 type listAccountsRequest struct {
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
-	PageID int32 `form:"page_id" binding:"required,min=1"`
+	PageID   int32 `form:"page_id" binding:"required,min=1"`
 }
 
 func (server *Server) listAccounts(ctx *gin.Context) {
@@ -78,8 +88,10 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	args := db.ListAccountsParams{
-		Limit: req.PageSize,
+		Owner:  authPayload.Username,
+		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
@@ -111,12 +123,29 @@ func (server *Server) updateAccount(ctx *gin.Context) {
 		return
 	}
 
+	account, err := server.store.GetAccount(ctx, uri.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if account.Owner != authPayload.Username {
+		err := errors.New("account doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	args := db.UpdateAccountParams{
-		ID: uri.ID,
+		ID:      account.ID,
 		Balance: req.Balance,
 	}
 
-	account, err := server.store.UpdateAccount(ctx, args)
+	account, err = server.store.UpdateAccount(ctx, args)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -136,13 +165,30 @@ func (server *Server) deleteAccount(ctx *gin.Context) {
 		return
 	}
 
-	err := server.store.DeleteAccount(ctx, uri.ID)
+	account, err := server.store.GetAccount(ctx, uri.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if account.Owner != authPayload.Username {
+		err := errors.New("account doesn't belong to the authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	err = server.store.DeleteAccount(ctx, uri.ID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message" : "account successfully deleted",
+		"message": "account successfully deleted",
 	})
 }
