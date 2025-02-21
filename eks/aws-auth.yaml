@@ -9,3 +9,5 @@ data:
       username: deployment:{{SessionName}}
       groups:
         - system:masters
+# ConfigMap harus dinyalakan pada awal pembuatan cluster.
+# jika tidak harus melalui create access pada aws console dan set policies-nya
