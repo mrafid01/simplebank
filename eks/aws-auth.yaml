@@ -5,7 +5,7 @@ metadata:
   namespace: kube-system 
 data: 
   mapRoles: | 
-    - userarn: arn:aws:iam::615299739574:role/deployment
-      username: deployment
+    - userarn: arn:aws:iam::615299739574:role/deployment/GitHubActions
+      username: github-actions
       groups:
         - system:masters
