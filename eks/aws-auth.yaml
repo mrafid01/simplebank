@@ -6,6 +6,6 @@ metadata:
 data: 
   mapRoles: | 
     - userarn: arn:aws:iam::615299739574:role/deployment/GitHubActions
-      username: github-actions
+      username: deployment:{{SessionName}}
       groups:
         - system:masters
