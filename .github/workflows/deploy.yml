@@ -45,7 +45,7 @@ jobs:
     #     docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -t $REGISTRY/$REPOSITORY:latest .
     #     docker push -a $REGISTRY/$REPOSITORY
 
-    - name: Update kube config
+    - name: Update kubeconfig
       run: |
         aws eks update-kubeconfig --name simple-bank --region ap-southeast-1
         kubectl get nodes
