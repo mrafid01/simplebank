@@ -1,0 +1,11 @@
+apiVersion: v1 
+kind: ConfigMap 
+metadata: 
+  name: aws-auth 
+  namespace: kube-system 
+data: 
+  mapRoles: | 
+    - userarn: arn:aws:iam::615299739574:role/deployment
+      username: deployment
+      groups:
+        - system:masters
