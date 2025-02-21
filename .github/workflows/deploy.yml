@@ -47,7 +47,7 @@ jobs:
 
     - name: Update kube config
       run: |
-        aws eks update-kubeconfig --name simple-bank --region ap-southeast-1 --role-arn arn:aws:iam::615299739574:role/deployment
+        aws eks update-kubeconfig --name simple-bank --region ap-southeast-1
         kubectl get nodes
         kubectl get pods
 
