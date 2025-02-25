@@ -5,8 +5,21 @@ package pb;
 import "rpc_create_user.proto";
 import "rpc_login_user.proto";
 import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "github.com/mrafid01/simplebank/pb";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+      title: "Simple Bank"
+      version: "1.0"
+      contact: {
+        name: "mrafid01"
+        url: "https://github.com/mrafid01"
+        email: "rafid.muhammad12@gmail.com"
+      };
+    }
+};
 
 service SimpleBank {
     rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {
