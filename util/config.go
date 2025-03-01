@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	Environment          string        `mapstructure:"ENVIRONMENT"`
 	DBDriver             string        `mapstructure:"DATABASE_DRIVER"`
 	DBSource             string        `mapstructure:"DATABASE_SOURCE"`
 	MigrationURL         string        `mapstructure:"MIGRATION_URL"`
