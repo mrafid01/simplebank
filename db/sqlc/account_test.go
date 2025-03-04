@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
@@ -13,12 +12,12 @@ import (
 func createRandomAccount(t *testing.T) Account {
 	user := createRandomUser(t)
 	args := CreateAccountParams{
-		Owner: user.Username,
-		Balance: util.RandomMoney(),
+		Owner:    user.Username,
+		Balance:  util.RandomMoney(),
 		Currency: util.RandomCurrency(),
 	}
 
-	account, err := testQueries.CreateAccount(context.Background(), args)
+	account, err := testStore.CreateAccount(context.Background(), args)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, account)
 
@@ -38,7 +37,7 @@ func TestCreateAccount(t *testing.T) {
 func TestGetAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 
-	account2, err := testQueries.GetAccount(context.Background(),account1.ID)
+	account2, err := testStore.GetAccount(context.Background(), account1.ID)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, account2)
 
@@ -53,11 +52,11 @@ func TestUpdateAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 
 	args := UpdateAccountParams{
-		ID: account1.ID,
+		ID:      account1.ID,
 		Balance: util.RandomMoney(),
 	}
 
-	account2, err := testQueries.UpdateAccount(context.Background(), args)
+	account2, err := testStore.UpdateAccount(context.Background(), args)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, account2)
 
@@ -71,32 +70,32 @@ func TestUpdateAccount(t *testing.T) {
 func TestDeleteAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 
-	err := testQueries.DeleteAccount(context.Background(), account1.ID)
+	err := testStore.DeleteAccount(context.Background(), account1.ID)
 	assert.NoError(t, err)
 
-	account2, err := testQueries.GetAccount(context.Background(), account1.ID)
+	account2, err := testStore.GetAccount(context.Background(), account1.ID)
 	assert.Error(t, err)
-	assert.EqualError(t, err, sql.ErrNoRows.Error())
+	assert.EqualError(t, err, ErrRecordNotFound.Error())
 	assert.Empty(t, account2)
 }
 
-func TestListAccounts(t *testing.T){
+func TestListAccounts(t *testing.T) {
 	var lastAccount Account
 	for i := 0; i <= 10; i++ {
 		lastAccount = createRandomAccount(t)
 	}
 
 	args := ListAccountsParams{
-		Owner: lastAccount.Owner,
-		Limit: 5,
+		Owner:  lastAccount.Owner,
+		Limit:  5,
 		Offset: 0,
 	}
 
-	accounts, err := testQueries.ListAccounts(context.Background(), args)
+	accounts, err := testStore.ListAccounts(context.Background(), args)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, accounts)
 
-	for _, account:= range accounts{
+	for _, account := range accounts {
 		assert.NotEmpty(t, account)
 		assert.Equal(t, account.Owner, lastAccount.Owner)
 	}

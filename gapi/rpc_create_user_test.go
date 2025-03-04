@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/lib/pq"
 	mockdb "github.com/mrafid01/simplebank/db/mock"
 	db "github.com/mrafid01/simplebank/db/sqlc"
 	"github.com/mrafid01/simplebank/pb"
@@ -60,7 +59,7 @@ func randomUser(t *testing.T, role string) (user db.User, password string) {
 	require.NoError(t, err)
 
 	user = db.User{
-		Username:       util.RandomOwner(),
+		Username: util.RandomOwner(),
 		// Role:           role,
 		HashedPassword: hashedPassword,
 		FullName:       util.RandomOwner(),
@@ -153,7 +152,7 @@ func TestCreateUserAPI(t *testing.T) {
 				store.EXPECT().
 					CreateUserTx(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.CreateUserTxResult{}, &pq.Error{Code: "23505"})
+					Return(db.CreateUserTxResult{}, db.ErrUniqueViolation)
 
 				taskDistributor.EXPECT().
 					DistributeTaskSendVerifyEmail(gomock.Any(), gomock.Any(), gomock.Any()).

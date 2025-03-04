@@ -10,13 +10,13 @@ import (
 )
 
 func createRandomTransfer(t *testing.T, account1, account2 Account) Transfer {
-	args := CreateTransferParams {
+	args := CreateTransferParams{
 		FromAccountID: account1.ID,
-		ToAccountID: account2.ID,
-		Amount: util.RandomMoney(),
+		ToAccountID:   account2.ID,
+		Amount:        util.RandomMoney(),
 	}
 
-	transfer, err := testQueries.CreateTransfer(context.Background(), args)
+	transfer, err := testStore.CreateTransfer(context.Background(), args)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, transfer)
 
@@ -26,7 +26,7 @@ func createRandomTransfer(t *testing.T, account1, account2 Account) Transfer {
 
 	assert.NotZero(t, transfer.ID)
 	assert.NotZero(t, transfer.CreatedAt)
-	
+
 	return transfer
 }
 
@@ -41,7 +41,7 @@ func TestGetTransfer(t *testing.T) {
 	account2 := createRandomAccount(t)
 	transfer1 := createRandomTransfer(t, account1, account2)
 
-	transfer2, err := testQueries.GetTransfer(context.Background(), transfer1.ID)
+	transfer2, err := testStore.GetTransfer(context.Background(), transfer1.ID)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, transfer2)
 
@@ -68,7 +68,7 @@ func TestListTransfer(t *testing.T) {
 		Offset:        5,
 	}
 
-	transfers, err := testQueries.ListTransfers(context.Background(), arg)
+	transfers, err := testStore.ListTransfers(context.Background(), arg)
 	assert.NoError(t, err)
 	assert.Len(t, transfers, 5)
 
