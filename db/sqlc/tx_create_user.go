@@ -3,8 +3,8 @@ package db
 import "context"
 
 type CreateUserTxParams struct {
-	CreateUserParams CreateUserParams
-	AfterCreate      func(user User) error
+	CreateUserParams
+	AfterCreate func(user User) error
 }
 
 type CreateUserTxResult struct {
