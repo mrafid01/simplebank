@@ -52,3 +52,17 @@ func ValidateFullName(full_name string) error {
 	}
 	return nil
 }
+
+func ValidateEmailId(emailId int64) error {
+	if emailId < 0 {
+		return fmt.Errorf("must be a positive integer")
+	}
+	return nil
+}
+
+func ValidateSecretCode(secret_code string) error {
+	if err := ValidateString(secret_code, 32, 100); err != nil {
+		return err
+	}
+	return nil
+}
