@@ -26,6 +26,7 @@ import (
 	"github.com/mrafid01/simplebank/pb"
 	"github.com/mrafid01/simplebank/util"
 	"github.com/mrafid01/simplebank/worker"
+	"github.com/rs/cors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
@@ -219,8 +220,28 @@ func runGatewayServer(
 	docHandler := http.FileServer(http.FS(subFS))
 	mux.Handle("/swagger/", http.StripPrefix("/swagger/", docHandler))
 
+	// c := cors.Default() // accept all incoming request (not best practice)
+	c := cors.New(cors.Options{
+		AllowedOrigins: config.AllowedOrigins,
+		AllowedMethods: []string{
+			http.MethodHead,
+			http.MethodOptions,
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodDelete,
+		},
+		AllowedHeaders: []string{
+			"Content-Type",
+			"Authorization",
+		},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(gapi.HttpLogger(mux))
+
 	httpServer := &http.Server{
-		Handler: gapi.HttpLogger(mux),
+		Handler: handler,
 		Addr:    config.HTTPServerAddress,
 	}
 
